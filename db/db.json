@@ -1,0 +1,24 @@
+{
+  "articles": [
+    {
+      "id": 1,
+      "designation": "Ordinateur",
+      "prix_unitaire": 5000,
+      "categorie_id": 1
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "nom": "Informatique"
+    },
+    {
+      "id": 2,
+      "nom": "Services"
+    },
+    {
+      "id": 3,
+      "nom": "Formation"
+    }
+  ]
+}

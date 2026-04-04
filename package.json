@@ -1,0 +1,32 @@
+{
+  "name": "gestion-factures",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.0",
+    "@mui/material": "^5.14.0",
+    "axios": "^1.4.0",
+    "firebase": "^10.0.0",
+    "formik": "^2.4.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.5.28",
+    "json-server": "^0.17.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.0",
+    "react-scripts": "5.0.1",
+    "recharts": "^2.7.0",
+    "yup": "^1.2.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "json-server": "json-server --watch db/db.json --port 3001"
+  },
+  "browserslist": {
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+  }
+}
