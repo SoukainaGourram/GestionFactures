@@ -1,10 +1,22 @@
 {
   "articles": [
     {
-      "id": 1,
-      "designation": "Ordinateur",
-      "prix_unitaire": 5000,
+      "id": 2,
+      "designation": "Écran 27 Pouces 4K",
+      "prix_unitaire": 3200,
       "categorie_id": 1
+    },
+    {
+      "id": 3,
+      "designation": "Consulting Cloud (heure)",
+      "prix_unitaire": 800,
+      "categorie_id": 2
+    },
+    {
+      "id": 4,
+      "designation": "Formation React & Node.js",
+      "prix_unitaire": 15000,
+      "categorie_id": 3
     }
   ],
   "categories": [
@@ -13,12 +25,144 @@
       "nom": "Informatique"
     },
     {
-      "id": 2,
-      "nom": "Services"
+      "id": 3,
+      "nom": "Formation"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@test.com",
+      "password": "admin123",
+      "role": "admin",
+      "name": "Administrateur"
     },
     {
       "id": 3,
-      "nom": "Formation"
+      "email": "client2@test.com",
+      "password": "client123",
+      "role": "client",
+      "clientId": 2,
+      "name": "Globex Corp"
+    },
+    {
+      "email": "doha@gmail.com",
+      "password": "client123",
+      "role": "client",
+      "clientId": 4,
+      "name": "doha",
+      "id": 5
+    }
+  ],
+  "clients": [
+    {
+      "id": 2,
+      "nom": "Globex Corp",
+      "email": "client2@test.com",
+      "telephone": "+212 654-987654",
+      "adresse": "Avenue Mohammed V, Rabat",
+      "codeClient": "CLI-2026-0002"
+    },
+    {
+      "nom": "doha",
+      "email": "doha@gmail.com",
+      "telephone": "0682342022",
+      "adresse": "Maarif\n",
+      "codeClient": "CLI-2026-0003",
+      "id": 4
+    }
+  ],
+  "factures": [
+    {
+      "id": 1,
+      "numero": "FAC-2026-0001",
+      "date": "2026-06-01",
+      "date_echeance": "2026-07-01",
+      "client_id": 1,
+      "client_nom": "Acme Corp",
+      "status": "payee",
+      "items": [
+        {
+          "article_id": 1,
+          "designation": "Ordinateur Portable Dell",
+          "prix_unitaire": 7500,
+          "quantite": 2,
+          "total": 15000
+        },
+        {
+          "article_id": 2,
+          "designation": "Écran 27 Pouces 4K",
+          "prix_unitaire": 3200,
+          "quantite": 1,
+          "total": 3200
+        }
+      ],
+      "total_ht": 18200,
+      "tva": 20,
+      "total_ttc": 21840
+    },
+    {
+      "id": 3,
+      "numero": "FAC-2026-0003",
+      "date": "2026-06-15",
+      "date_echeance": "2026-07-15",
+      "client_id": 2,
+      "client_nom": "Globex Corp",
+      "status": "refusee",
+      "items": [
+        {
+          "article_id": 4,
+          "designation": "Formation React & Node.js",
+          "prix_unitaire": 15000,
+          "quantite": 1,
+          "total": 15000
+        }
+      ],
+      "total_ht": 15000,
+      "tva": 20,
+      "total_ttc": 18000
+    },
+    {
+      "id": 4,
+      "numero": "FAC-2026-0004",
+      "date": "2026-06-20",
+      "date_echeance": "2026-07-20",
+      "client_id": 2,
+      "client_nom": "Globex Corp",
+      "status": "en_attente",
+      "items": [
+        {
+          "article_id": 2,
+          "designation": "Écran 27 Pouces 4K",
+          "prix_unitaire": 3200,
+          "quantite": 3,
+          "total": 9600
+        }
+      ],
+      "total_ht": 9600,
+      "tva": 20,
+      "total_ttc": 11520
+    },
+    {
+      "numero": "FAC-2026-0004",
+      "date": "2026-06-22",
+      "date_echeance": "2026-07-22",
+      "client_id": 2,
+      "client_nom": "Globex Corp",
+      "status": "en_attente",
+      "items": [
+        {
+          "article_id": 4,
+          "designation": "Formation React & Node.js",
+          "prix_unitaire": 15000,
+          "quantite": 6,
+          "total": 90000
+        }
+      ],
+      "total_ht": 90000,
+      "tva": 20,
+      "total_ttc": 108000,
+      "id": 5
     }
   ]
 }
