@@ -42,6 +42,21 @@ function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
+  const getUserAvatar = () => {
+    if (userRole === 'admin') {
+      return '/images/avatar_admin.png';
+    }
+    if (currentUser?.email === 'client1@test.com') {
+      return '/images/logo_acme.png';
+    }
+    if (currentUser?.email === 'client2@test.com') {
+      return '/images/logo_globex.png';
+    }
+    return null;
+  };
+
+  const avatarUrl = getUserAvatar();
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -85,8 +100,11 @@ function Layout() {
       </Box>
 
       <Box sx={{ p: 2, m: 2, bgcolor: '#1e293b', borderRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Avatar sx={{ bgcolor: userRole === 'admin' ? theme.palette.secondary.main : theme.palette.info.main }}>
-          {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+        <Avatar 
+          src={avatarUrl || undefined}
+          sx={{ bgcolor: userRole === 'admin' ? theme.palette.secondary.main : theme.palette.info.main }}
+        >
+          {!avatarUrl && (currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U')}
         </Avatar>
         <Box sx={{ overflow: 'hidden' }}>
           <Typography variant="body2" fontWeight="bold" noWrap sx={{ color: '#f1f5f9' }}>
@@ -213,6 +231,7 @@ function Layout() {
               color="inherit"
             >
               <Avatar
+                src={avatarUrl || undefined}
                 sx={{
                   width: 36,
                   height: 36,
@@ -221,7 +240,7 @@ function Layout() {
                   fontWeight: 'bold'
                 }}
               >
-                {currentUser?.name ? currentUser.name.split(' ').map(n=>n[0]).join('').toUpperCase() : 'U'}
+                {!avatarUrl && (currentUser?.name ? currentUser.name.split(' ').map(n=>n[0]).join('').toUpperCase() : 'U')}
               </Avatar>
             </IconButton>
             <Menu

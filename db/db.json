@@ -38,6 +38,14 @@
       "name": "Administrateur"
     },
     {
+      "id": 2,
+      "email": "client1@test.com",
+      "password": "client123",
+      "role": "client",
+      "clientId": 1,
+      "name": "Acme Corp"
+    },
+    {
       "id": 3,
       "email": "client2@test.com",
       "password": "client123",
@@ -55,6 +63,14 @@
     }
   ],
   "clients": [
+    {
+      "id": 1,
+      "nom": "Acme Corp",
+      "email": "client1@test.com",
+      "telephone": "+212 522-123456",
+      "adresse": "Boulevard Anfa, Casablanca",
+      "codeClient": "CLI-2026-0001"
+    },
     {
       "id": 2,
       "nom": "Globex Corp",

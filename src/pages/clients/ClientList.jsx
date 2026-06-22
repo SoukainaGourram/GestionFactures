@@ -21,7 +21,8 @@ import {
   CircularProgress,
   Stack,
   Alert,
-  Snackbar
+  Snackbar,
+  Avatar
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -63,8 +64,8 @@ function ClientList() {
           return { data: [] }; // Return empty data on failure
         })
       ]);
-      setClients(cliRes.data);
-      setUsers(userRes.data);
+      setClients(cliRes.data || []);
+      setUsers(userRes.data || []);
     } catch (err) {
       showNotification('Erreur de chargement des données.', 'error');
     } finally {
@@ -131,7 +132,8 @@ function ClientList() {
         showNotification(`Client ${client.nom} supprimé.`);
         loadData();
       } catch (err) {
-        showNotification('Erreur de suppression.', 'error');
+        console.error("Erreur de suppression du client:", err);
+        showNotification('Erreur lors de la suppression.', 'error');
       }
     }
   };
@@ -220,7 +222,20 @@ function ClientList() {
             Gérez les fiches clients et leurs comptes de connexion.
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenAdd} sx={{ borderRadius: 2 }}>
+        <Button 
+          variant="contained" 
+          startIcon={<AddIcon />} 
+          onClick={handleOpenAdd} 
+          sx={{ 
+            borderRadius: '12px',
+            bgcolor: '#2563eb',
+            py: 1.2,
+            px: 2.5,
+            fontWeight: 'bold',
+            '&:hover': { bgcolor: '#1d4ed8' },
+            boxShadow: '0 4px 14px rgba(37, 99, 235, 0.2)'
+          }}
+        >
           Nouveau Client
         </Button>
       </Box>
@@ -238,7 +253,7 @@ function ClientList() {
               <SearchIcon color="action" />
             </InputAdornment>
           ),
-          sx: { borderRadius: 3, bgcolor: 'white' }
+          sx: { borderRadius: '12px', bgcolor: 'white' }
         }}
       />
 
@@ -247,42 +262,71 @@ function ClientList() {
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+        <TableContainer component={Paper} sx={{ borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
           <Table>
             <TableHead sx={{ bgcolor: '#f8fafc' }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 'bold' }}>Code Client</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Nom / Raison Sociale</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Téléphone</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>Adresse</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Client / Code</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Email</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Téléphone</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Adresse</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold', color: '#475569' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredClients.length > 0 ? (
-                filteredClients.map((client) => (
-                  <TableRow key={client.id} hover>
-                    <TableCell fontWeight="600">{client.codeClient || `CLI-${client.id}`}</TableCell>
-                    <TableCell fontWeight="bold" color="primary.main">{client.nom}</TableCell>
-                    <TableCell>{client.email}</TableCell>
-                    <TableCell>{client.telephone || '-'}</TableCell>
-                    <TableCell>{client.adresse || '-'}</TableCell>
-                    <TableCell align="center">
-                      <Stack direction="row" spacing={1} justifyContent="center">
-                        <IconButton color="primary" onClick={() => handleOpenEdit(client)}>
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton color="error" onClick={() => handleDelete(client)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                ))
+                filteredClients.map((client) => {
+                  // Determine dynamic logo
+                  let logoUrl = null;
+                  if (client.email === 'client1@test.com') logoUrl = '/images/logo_acme.png';
+                  else if (client.email === 'client2@test.com') logoUrl = '/images/logo_globex.png';
+
+                  return (
+                    <TableRow key={client.id} hover>
+                      <TableCell>
+                        <Stack direction="row" spacing={2} alignItems="center">
+                          <Avatar 
+                            src={logoUrl || undefined}
+                            sx={{ 
+                              width: 40, 
+                              height: 40, 
+                              bgcolor: 'primary.light',
+                              fontSize: '1rem',
+                              fontWeight: 'bold',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                            }}
+                          >
+                            {!logoUrl && client.nom.charAt(0).toUpperCase()}
+                          </Avatar>
+                          <Box>
+                            <Typography variant="body2" fontWeight="bold" color="primary.main">
+                              {client.nom}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" display="block">
+                              {client.codeClient || `CLI-${client.id}`}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 500 }}>{client.email}</TableCell>
+                      <TableCell>{client.telephone || '-'}</TableCell>
+                      <TableCell>{client.adresse || '-'}</TableCell>
+                      <TableCell align="center">
+                        <Stack direction="row" spacing={1} justifyContent="center">
+                          <IconButton color="primary" onClick={() => handleOpenEdit(client)}>
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton color="error" onClick={() => handleDelete(client)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
                     Aucun client trouvé.
                   </TableCell>
                 </TableRow>
@@ -293,7 +337,7 @@ function ClientList() {
       )}
 
       {/* Add / Edit Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '16px' } }}>
         <form onSubmit={handleFormSubmit}>
           <DialogTitle fontWeight="bold">
             {isEdit ? 'Modifier le Client' : 'Créer un Nouveau Client'}
@@ -306,7 +350,7 @@ function ClientList() {
                 fullWidth
                 value={formData.nom}
                 onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
-                InputProps={{ sx: { borderRadius: 2 } }}
+                InputProps={{ sx: { borderRadius: '12px' } }}
               />
               <TextField
                 label="Adresse Email"
@@ -315,7 +359,7 @@ function ClientList() {
                 fullWidth
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                InputProps={{ sx: { borderRadius: 2 } }}
+                InputProps={{ sx: { borderRadius: '12px' } }}
                 helperText="Sert d'identifiant de connexion pour le client"
               />
               <TextField
@@ -323,7 +367,7 @@ function ClientList() {
                 fullWidth
                 value={formData.telephone}
                 onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
-                InputProps={{ sx: { borderRadius: 2 } }}
+                InputProps={{ sx: { borderRadius: '12px' } }}
               />
               <TextField
                 label="Adresse Physique"
@@ -332,7 +376,7 @@ function ClientList() {
                 rows={2}
                 value={formData.adresse}
                 onChange={(e) => setFormData({ ...formData, adresse: e.target.value })}
-                InputProps={{ sx: { borderRadius: 2 } }}
+                InputProps={{ sx: { borderRadius: '12px' } }}
               />
               <TextField
                 label="Mot de passe du compte client"
@@ -341,16 +385,16 @@ function ClientList() {
                 type="text" // text format so they can see what is generated/modified
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                InputProps={{ sx: { borderRadius: 2 } }}
+                InputProps={{ sx: { borderRadius: '12px' } }}
                 helperText="Mot de passe que le client utilisera pour se connecter à son espace"
               />
             </Stack>
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
-            <Button onClick={() => setOpen(false)} variant="outlined" color="inherit" sx={{ borderRadius: 2 }}>
+            <Button onClick={() => setOpen(false)} variant="outlined" color="inherit" sx={{ borderRadius: '12px' }}>
               Annuler
             </Button>
-            <Button type="submit" variant="contained" sx={{ borderRadius: 2 }}>
+            <Button type="submit" variant="contained" sx={{ borderRadius: '12px', bgcolor: '#2563eb', '&:hover': { bgcolor: '#1d4ed8' } }}>
               Enregistrer
             </Button>
           </DialogActions>
@@ -364,7 +408,7 @@ function ClientList() {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={notification.severity} sx={{ width: '100%', borderRadius: 2 }}>
+        <Alert onClose={handleCloseSnackbar} severity={notification.severity} sx={{ width: '100%', borderRadius: '8px' }}>
           {notification.message}
         </Alert>
       </Snackbar>
