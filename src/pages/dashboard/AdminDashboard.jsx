@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getFactures, getClients } from '../../services/jsonService';
+import { getFactures, getClients, getNotifications } from '../../services/jsonService';
 import {
   Box,
   Typography,
@@ -18,14 +18,23 @@ import {
   Button,
   CircularProgress,
   Stack,
-  useTheme
+  useTheme,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider
 } from '@mui/material';
 import {
   Receipt as ReceiptIcon,
   AttachMoney as MoneyIcon,
   HourglassEmpty as HourglassIcon,
   CancelOutlined as CancelIcon,
-  ArrowForward as ArrowForwardIcon
+  ArrowForward as ArrowForwardIcon,
+  CheckCircle as ValidIcon,
+  AddCircle as CreateIcon,
+  Edit as EditIcon,
+  DeleteForever as DeleteIcon
 } from '@mui/icons-material';
 import {
   BarChart,
@@ -47,6 +56,7 @@ function AdminDashboard() {
 
   const [invoices, setInvoices] = useState([]);
   const [clientsCount, setClientsCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
@@ -59,10 +69,18 @@ function AdminDashboard() {
     async function fetchData() {
       try {
         setLoading(true);
-        const [invRes, cliRes] = await Promise.all([getFactures(), getClients()]);
-        const invs = invRes.data;
+        const [invRes, cliRes, notifRes] = await Promise.all([
+          getFactures(),
+          getClients(),
+          getNotifications().catch(() => ({ data: [] }))
+        ]);
+        const invs = invRes.data || [];
         setInvoices(invs);
-        setClientsCount(cliRes.data.length);
+        setClientsCount(cliRes.data ? cliRes.data.length : 0);
+        
+        // Sort notifications by date descending
+        const sortedNotifs = (notifRes.data || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+        setNotifications(sortedNotifs.slice(0, 5)); // show top 5
 
         // Calculate statistics
         const totalCount = invs.length;
@@ -144,6 +162,25 @@ function AdminDashboard() {
         return <Chip label="Rejetée" color="error" size="small" sx={{ fontWeight: 'bold', borderRadius: '6px' }} />;
       default:
         return <Chip label={status} size="small" sx={{ borderRadius: '6px' }} />;
+    }
+  };
+
+  const getCurrencySymbol = (curr) => {
+    return curr === 'MAD' ? 'DH' : curr === 'EUR' ? '€' : '$';
+  };
+
+  const getNotifIcon = (type) => {
+    switch (type) {
+      case 'creation':
+        return <CreateIcon sx={{ color: 'primary.main' }} />;
+      case 'validation':
+        return <ValidIcon sx={{ color: 'success.main' }} />;
+      case 'rejet':
+        return <CancelIcon sx={{ color: 'error.main' }} />;
+      case 'suppression':
+        return <DeleteIcon sx={{ color: 'error.light' }} />;
+      default:
+        return <EditIcon sx={{ color: 'warning.main' }} />;
     }
   };
 
@@ -278,7 +315,7 @@ function AdminDashboard() {
                   <Box
                     sx={{
                       color: card.color,
-                      bgcolor: `${card.color}15`, // Approx 8% opacity background
+                      bgcolor: `${card.color}15`,
                       borderRadius: '12px',
                       p: 1.5,
                       display: 'flex',
@@ -366,58 +403,103 @@ function AdminDashboard() {
         </Grid>
       </Grid>
 
-      {/* Recent Invoices Table */}
-      <Paper sx={{ p: 3, borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h6" fontWeight="bold">
-            Factures Récentes
-          </Typography>
-          <Button
-            size="small"
-            color="primary"
-            endIcon={<ArrowForwardIcon />}
-            onClick={() => navigate('/factures')}
-            sx={{ fontWeight: 'bold' }}
-          >
-            Toutes les factures
-          </Button>
-        </Box>
+      {/* Recent Invoices Table & Workflow Feed split */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={8}>
+          <Paper sx={{ p: 3, borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', minHeight: 320 }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography variant="h6" fontWeight="bold">
+                Factures Récentes
+              </Typography>
+              <Button
+                size="small"
+                color="primary"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => navigate('/factures')}
+                sx={{ fontWeight: 'bold' }}
+              >
+                Toutes les factures
+              </Button>
+            </Box>
 
-        <TableContainer>
-          <Table sx={{ minWidth: 650 }}>
-            <TableHead sx={{ bgcolor: '#f8fafc' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Numéro</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Client</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Montant HT</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Montant TTC</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Statut</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {invoices.length > 0 ? (
-                invoices.slice(0, 5).map((row) => (
-                  <TableRow key={row.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell fontWeight="bold">{row.numero}</TableCell>
-                    <TableCell fontWeight="500">{row.client_nom}</TableCell>
-                    <TableCell>{row.date}</TableCell>
-                    <TableCell>{row.total_ht.toLocaleString('fr-FR')} DH</TableCell>
-                    <TableCell fontWeight="bold" color="primary.main">{row.total_ttc.toLocaleString('fr-FR')} DH</TableCell>
-                    <TableCell>{getStatusChip(row.status)}</TableCell>
+            <TableContainer>
+              <Table sx={{ minWidth: 500 }}>
+                <TableHead sx={{ bgcolor: '#f8fafc' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Numéro</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Client</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Montant TTC</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', color: '#475569' }}>Statut</TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                    Aucune facture récente.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+                </TableHead>
+                <TableBody>
+                  {invoices.length > 0 ? (
+                    invoices.slice(0, 5).map((row) => (
+                      <TableRow key={row.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                        <TableCell fontWeight="bold">{row.numero}</TableCell>
+                        <TableCell fontWeight="500">{row.client_nom}</TableCell>
+                        <TableCell>{row.date}</TableCell>
+                        <TableCell fontWeight="bold" color="primary.main">
+                          {row.total_ttc.toLocaleString('fr-FR')} {getCurrencySymbol(row.currency)}
+                        </TableCell>
+                        <TableCell>{getStatusChip(row.status)}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                        Aucune facture récente.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        </Grid>
+
+        {/* Workflow alert log */}
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3, borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', minHeight: 320, display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="h6" fontWeight="bold" mb={2}>
+              Workflow & Alertes Activité
+            </Typography>
+            {notifications.length > 0 ? (
+              <List sx={{ width: '100%', bgcolor: 'background.paper', flexGrow: 1, py: 0 }}>
+                {notifications.map((notif, index) => (
+                  <React.Fragment key={notif.id}>
+                    <ListItem alignItems="flex-start" sx={{ px: 0, py: 1.5 }}>
+                      <ListItemIcon sx={{ minWidth: 40, mt: 0.5 }}>
+                        {getNotifIcon(notif.type)}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Typography variant="body2" fontWeight="600" color="text.primary">
+                            {notif.message}
+                          </Typography>
+                        }
+                        secondary={
+                          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                            {new Date(notif.date).toLocaleString('fr-FR')}
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
+                    {index < notifications.length - 1 && <Divider component="li" sx={{ opacity: 0.6 }} />}
+                  </React.Fragment>
+                ))}
+              </List>
+            ) : (
+              <Box display="flex" justifyContent="center" alignItems="center" flexGrow={1}>
+                <Typography variant="body2" color="text.secondary">
+                  Aucun événement de workflow enregistré.
+                </Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

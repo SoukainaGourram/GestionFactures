@@ -30,6 +30,10 @@ const DEFAULT_DB = {
       nom: "Informatique"
     },
     {
+      id: 2,
+      nom: "Services"
+    },
+    {
       id: 3,
       nom: "Formation"
     }
@@ -185,6 +189,26 @@ const DEFAULT_DB = {
       tva: 20,
       total_ttc: 108000
     }
+  ],
+  notifications: [
+    {
+      id: 1,
+      message: "Facture FAC-2026-0001 créée par l'Administrateur.",
+      type: "creation",
+      date: "2026-06-01T10:00:00Z"
+    },
+    {
+      id: 2,
+      message: "Facture FAC-2026-0001 validée par l'Administrateur et envoyée par email au client.",
+      type: "validation",
+      date: "2026-06-01T11:30:00Z"
+    },
+    {
+      id: 3,
+      message: "Facture FAC-2026-0003 rejetée par l'Administrateur.",
+      type: "rejet",
+      date: "2026-06-15T15:45:00Z"
+    }
   ]
 };
 
@@ -299,3 +323,7 @@ export const getUsers = () => request('get', '/users');
 export const addUser = (data) => request('post', '/users', data);
 export const updateUser = (id, data) => request('put', `/users/${id}`, data);
 export const deleteUser = (id) => request('delete', `/users/${id}`);
+
+// Notifications
+export const getNotifications = () => request('get', '/notifications');
+export const addNotification = (data) => request('post', '/notifications', data);

@@ -25,6 +25,10 @@
       "nom": "Informatique"
     },
     {
+      "id": 2,
+      "nom": "Services"
+    },
+    {
       "id": 3,
       "nom": "Formation"
     }
@@ -179,6 +183,26 @@
       "tva": 20,
       "total_ttc": 108000,
       "id": 5
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "message": "Facture FAC-2026-0001 créée par l'Administrateur.",
+      "type": "creation",
+      "date": "2026-06-01T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "message": "Facture FAC-2026-0001 validée par l'Administrateur et envoyée par email au client.",
+      "type": "validation",
+      "date": "2026-06-01T11:30:00Z"
+    },
+    {
+      "id": 3,
+      "message": "Facture FAC-2026-0003 rejetée par l'Administrateur.",
+      "type": "rejet",
+      "date": "2026-06-15T15:45:00Z"
     }
   ]
 }

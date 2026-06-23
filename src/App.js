@@ -111,18 +111,10 @@ function App() {
               {/* Invoices list is visible to both but filtered internally */}
               <Route path="/factures" element={<FactureList />} />
               
-              {/* Invoice creation/edit only for Admin */}
-              <Route path="/factures/new" element={
-                <ProtectedRoute role="admin">
-                  <FactureForm />
-                </ProtectedRoute>
-              } />
+              {/* Invoice creation/edit accessible to both Admin and User (Comptable/Agent) */}
+              <Route path="/factures/new" element={<FactureForm />} />
               
-              <Route path="/factures/edit/:id" element={
-                <ProtectedRoute role="admin">
-                  <FactureForm />
-                </ProtectedRoute>
-              } />
+              <Route path="/factures/edit/:id" element={<FactureForm />} />
 
               {/* Client, Articles, Categories only for Admin */}
               <Route path="/clients" element={

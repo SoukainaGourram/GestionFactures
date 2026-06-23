@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { getFactures } from '../../services/jsonService';
+import { getFactures, getNotifications } from '../../services/jsonService';
 import { generatePDF } from '../../utils/pdfGenerator';
 import {
   Box,
@@ -20,7 +20,12 @@ import {
   Button,
   CircularProgress,
   IconButton,
-  useTheme
+  useTheme,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider
 } from '@mui/material';
 import {
   Receipt as ReceiptIcon,
@@ -28,7 +33,10 @@ import {
   HourglassEmpty as HourglassIcon,
   CancelOutlined as CancelIcon,
   Download as DownloadIcon,
-  ArrowForward as ArrowForwardIcon
+  ArrowForward as ArrowForwardIcon,
+  CheckCircle as ValidIcon,
+  AddCircle as CreateIcon,
+  Edit as EditIcon
 } from '@mui/icons-material';
 import {
   PieChart,
@@ -45,6 +53,7 @@ function UserDashboard() {
   const theme = useTheme();
 
   const [invoices, setInvoices] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
@@ -62,10 +71,20 @@ function UserDashboard() {
 
       try {
         setLoading(true);
-        const res = await getFactures();
+        const [invRes, notifRes] = await Promise.all([
+          getFactures(),
+          getNotifications().catch(() => ({ data: [] }))
+        ]);
+        
         // Filter invoices belonging to the logged-in client
-        const clientInvoices = res.data.filter(inv => String(inv.client_id) === String(currentUser.clientId));
+        const clientInvoices = (invRes.data || []).filter(inv => String(inv.client_id) === String(currentUser.clientId));
         setInvoices(clientInvoices);
+
+        // Filter notifications that pertain to this specific client's business or general creations
+        const sortedNotifs = (notifRes.data || [])
+          .filter(n => n.message.toLowerCase().includes(currentUser.name.toLowerCase()) || n.message.includes(currentUser.email))
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+        setNotifications(sortedNotifs.slice(0, 5)); // top 5 relevant
 
         // Calculate statistics
         const totalCount = clientInvoices.length;
@@ -120,6 +139,23 @@ function UserDashboard() {
         return <Chip label="Rejetée" color="error" size="small" sx={{ fontWeight: 'bold', borderRadius: '6px' }} />;
       default:
         return <Chip label={status} size="small" sx={{ borderRadius: '6px' }} />;
+    }
+  };
+
+  const getCurrencySymbol = (curr) => {
+    return curr === 'MAD' ? 'DH' : curr === 'EUR' ? '€' : '$';
+  };
+
+  const getNotifIcon = (type) => {
+    switch (type) {
+      case 'creation':
+        return <CreateIcon sx={{ color: 'primary.main' }} />;
+      case 'validation':
+        return <ValidIcon sx={{ color: 'success.main' }} />;
+      case 'rejet':
+        return <CancelIcon sx={{ color: 'error.main' }} />;
+      default:
+        return <EditIcon sx={{ color: 'warning.main' }} />;
     }
   };
 
@@ -241,7 +277,7 @@ function UserDashboard() {
                   <Box
                     sx={{
                       color: card.color,
-                      bgcolor: `${card.color}15`, // Approx 8% opacity background
+                      bgcolor: `${card.color}15`,
                       borderRadius: '12px',
                       p: 1.5,
                       display: 'flex',
@@ -259,7 +295,7 @@ function UserDashboard() {
       </Grid>
 
       {/* Main Grid split: Recent Invoices & Chart */}
-      <Grid container spacing={3}>
+      <Grid container spacing={3} mb={4}>
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3, borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -296,7 +332,9 @@ function UserDashboard() {
                         <TableCell fontWeight="bold">{row.numero}</TableCell>
                         <TableCell>{row.date}</TableCell>
                         <TableCell>{row.date_echeance || '-'}</TableCell>
-                        <TableCell fontWeight="bold" color="primary.main">{row.total_ttc.toLocaleString('fr-FR')} DH</TableCell>
+                        <TableCell fontWeight="bold" color="primary.main">
+                          {row.total_ttc.toLocaleString('fr-FR')} {getCurrencySymbol(row.currency)}
+                        </TableCell>
                         <TableCell>{getStatusChip(row.status)}</TableCell>
                         <TableCell align="center">
                           <IconButton
@@ -327,7 +365,7 @@ function UserDashboard() {
             <Typography variant="h6" fontWeight="bold" mb={2}>
               Statut de vos Règlements
             </Typography>
-            <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+            <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 220 }}>
               {pieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
@@ -359,6 +397,47 @@ function UserDashboard() {
                 <Typography color="text.secondary">Aucune statistique disponible</Typography>
               )}
             </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Workflow Notification Feed split for User dashboard */}
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+            <Typography variant="h6" fontWeight="bold" mb={2}>
+              Journal des Alertes & Activité Liée
+            </Typography>
+            {notifications.length > 0 ? (
+              <List sx={{ width: '100%', bgcolor: 'background.paper', py: 0 }}>
+                {notifications.map((notif, index) => (
+                  <React.Fragment key={notif.id}>
+                    <ListItem alignItems="flex-start" sx={{ px: 0, py: 1.5 }}>
+                      <ListItemIcon sx={{ minWidth: 40, mt: 0.5 }}>
+                        {getNotifIcon(notif.type)}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Typography variant="body2" fontWeight="600" color="text.primary">
+                            {notif.message}
+                          </Typography>
+                        }
+                        secondary={
+                          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                            {new Date(notif.date).toLocaleString('fr-FR')}
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
+                    {index < notifications.length - 1 && <Divider component="li" sx={{ opacity: 0.6 }} />}
+                  </React.Fragment>
+                ))}
+              </List>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                Aucune alerte de workflow enregistrée pour vos factures.
+              </Typography>
+            )}
           </Paper>
         </Grid>
       </Grid>
