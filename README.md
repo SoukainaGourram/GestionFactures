@@ -1,4 +1,4 @@
-# FactureFlow - Système de Facturation & Gestion Professionnelle (PFA)
+# FactureFlow - Système de Facturation & Gestion Professionnelle 
 
 **FactureFlow** est une application web moderne et robuste développée en React.js, conçue pour simplifier la gestion de la facturation, le suivi des règlements clients et l'analyse financière. Ce projet intègre les contraintes techniques et académiques d'un **Projet de Fin d'Année (PFA)** axé sur l'entreprenariat et la gestion de projet.
 
