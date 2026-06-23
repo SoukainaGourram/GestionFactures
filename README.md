@@ -6,7 +6,7 @@ L'application intègre également un **mode hors-ligne automatique (localStorage
 
 ---
 
-## 🚀 Fonctionnalités Clés
+##  Fonctionnalités Clés
 
 ### 1. Gestion Dynamique de la Facturation
 - **Création & Édition de factures** avec calculs automatiques en temps réel.
@@ -39,7 +39,7 @@ L'application intègre également un **mode hors-ligne automatique (localStorage
 
 ---
 
-## 🛠️ Technologies Utilisées
+##  Technologies Utilisées
 
 - **Frontend :** React JS (Hooks, Contexts, Architecture modulaire)
 - **Design System :** Material UI (MUI) - Design premium responsive, effets split-screen, micro-animations, glassmorphism.
@@ -49,7 +49,7 @@ L'application intègre également un **mode hors-ligne automatique (localStorage
 
 ---
 
-## 📦 Installation et Lancement
+##  Installation et Lancement
 
 ### 1. Cloner le dépôt
 ```bash
@@ -77,7 +77,7 @@ L'application sera accessible sur [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 🔑 Comptes de Test (Simulation)
+##  Comptes de Test (Simulation)
 
 | Rôle / Profil | Adresse E-mail | Mot de passe |
 | :--- | :--- | :--- |
